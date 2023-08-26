@@ -50,6 +50,30 @@ def generate_image(image):
 
     return res, res_plotted
 
+def get_video_bytes(source_vid):
+    with open(str(source_vid), 'rb') as video_file:
+        video_bytes = video_file.read()
+
+    return video_bytes
+
+def show_video(vid_cap, show=True):
+    results = []
+
+    while (vid_cap.isOpened()):
+        success, image = vid_cap.read()
+
+        if success:
+            res, res_plotted = generate_image(image)
+            results.append(res)
+
+            if show:
+                st_frame.image(res_plotted, caption='Detected Video', channels="BGR", use_column_width=True)
+        else:
+            vid_cap.release()
+            break
+
+    return results
+
 configure_page(title)
 
 source_vid, confidence = configure_sidebar()
@@ -61,8 +85,7 @@ model = load_model(model_path)
 if source_vid is None:
     exit()
 
-with open(str(source_vid), 'rb') as video_file:
-    video_bytes = video_file.read()
+video_bytes = get_video_bytes(source_vid)
 
 if video_bytes:
     st.video(video_bytes)
@@ -71,12 +94,6 @@ if st.sidebar.button('Detect Objects'):
     vid_cap = cv2.VideoCapture("videos/combat.mp4")
     st_frame = st.empty()
     
-    while (vid_cap.isOpened()):
-        success, image = vid_cap.read()
+    results = show_video(vid_cap, show=False)
 
-        if success:
-            results, res_plotted = generate_image(image)
-            st_frame.image(res_plotted, caption='Detected Video', channels="BGR", use_column_width=True)
-        else:
-            vid_cap.release()
-            break
+    print(results)
