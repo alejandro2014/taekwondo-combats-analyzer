@@ -31,43 +31,52 @@ def get_available_videos():
         "videos/office-video.mp4"
     ]
 
+def load_model(model_path):
+    try:
+        model = YOLO(model_path)
+    except Exception as ex:
+        st.error(f"Unable to load model. Check the specified path: {model_path}")
+        st.error(ex)
+
+    return model
+
+def generate_image(image):
+    image = cv2.resize(image, (720, int(720*(9/16))))
+
+    res = model.predict(image, conf=confidence)
+
+    #result_tensor = res[0].boxes
+    res_plotted = res[0].plot()
+
+    return res, res_plotted
+
 configure_page(title)
 
 source_vid, confidence = configure_sidebar()
 
 st.title(title)
 
-try:
-    model = YOLO(model_path)
-except Exception as ex:
-    st.error(
-        f"Unable to load model. Check the specified path: {model_path}")
-    st.error(ex)
+model = load_model(model_path)
 
-if source_vid is not None:
-    with open(str(source_vid), 'rb') as video_file:
-        video_bytes = video_file.read()
+if source_vid is None:
+    exit()
 
-    if video_bytes:
-        st.video(video_bytes)
+with open(str(source_vid), 'rb') as video_file:
+    video_bytes = video_file.read()
 
-    if st.sidebar.button('Detect Objects'):
-        vid_cap = cv2.VideoCapture("videos/combat.mp4")
-        st_frame = st.empty()
-        
-        while (vid_cap.isOpened()):
-            success, image = vid_cap.read()
+if video_bytes:
+    st.video(video_bytes)
 
-            if success:
-                image = cv2.resize(image, (720, int(720*(9/16))))
-                res = model.predict(image, conf=confidence)
-                result_tensor = res[0].boxes
-                res_plotted = res[0].plot()
-                st_frame.image(res_plotted,
-                               caption='Detected Video',
-                               channels="BGR",
-                               use_column_width=True
-                               )
-            else:
-                vid_cap.release()
-                break
+if st.sidebar.button('Detect Objects'):
+    vid_cap = cv2.VideoCapture("videos/combat.mp4")
+    st_frame = st.empty()
+    
+    while (vid_cap.isOpened()):
+        success, image = vid_cap.read()
+
+        if success:
+            results, res_plotted = generate_image(image)
+            st_frame.image(res_plotted, caption='Detected Video', channels="BGR", use_column_width=True)
+        else:
+            vid_cap.release()
+            break
