@@ -7,19 +7,33 @@ title = "Taekwondo combats analyzer"
 #model_path = "weights/yolov8n.pt"
 model_path = 'weights/yolov8n-pose.pt'
 
-st.set_page_config(
-    page_title=title,
-    page_icon="🤼‍♂️",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+def configure_page(title):
+    st.set_page_config(
+        page_title=title,
+        page_icon="🤼‍♂️",
+        layout="wide",
+        initial_sidebar_state="expanded"
+    )
 
-with st.sidebar:
-    st.header("Image/Video Config")
+def configure_sidebar():
+    with st.sidebar:
+        st.header("Image/Video Config")
     
-    source_vid = st.sidebar.selectbox("Choose a video...", ["videos/combat.mp4", "videos/office-video.mp4"])
+        source_vid = st.sidebar.selectbox("Choose a video...", get_available_videos())
 
-    confidence = float(st.slider("Select Model Confidence", 25, 100, 40)) / 100
+        confidence = float(st.slider("Select Model Confidence", 25, 100, 40)) / 100
+
+    return source_vid, confidence
+
+def get_available_videos():
+    return [
+        "videos/combat.mp4",
+        "videos/office-video.mp4"
+    ]
+
+configure_page(title)
+
+source_vid, confidence = configure_sidebar()
 
 st.title(title)
 
