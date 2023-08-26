@@ -4,7 +4,8 @@ from ultralytics import YOLO
 
 title = "Taekwondo combats analyzer"
 
-model_path = "weights/yolov8n.pt"
+#model_path = "weights/yolov8n.pt"
+model_path = 'weights/yolov8n-pose.pt'
 
 st.set_page_config(
     page_title=title,
@@ -16,7 +17,7 @@ st.set_page_config(
 with st.sidebar:
     st.header("Image/Video Config")
     
-    source_vid = st.sidebar.selectbox("Choose a video...", ["videos/office-video.mp4"])
+    source_vid = st.sidebar.selectbox("Choose a video...", ["videos/combat.mp4", "videos/office-video.mp4"])
 
     confidence = float(st.slider("Select Model Confidence", 25, 100, 40)) / 100
 
@@ -37,7 +38,7 @@ if source_vid is not None:
         st.video(video_bytes)
 
     if st.sidebar.button('Detect Objects'):
-        vid_cap = cv2.VideoCapture("videos/office-video.mp4")
+        vid_cap = cv2.VideoCapture("videos/combat.mp4")
         st_frame = st.empty()
         
         while (vid_cap.isOpened()):
