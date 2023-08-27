@@ -1,4 +1,5 @@
 import cv2
+import json
 import os
 import streamlit as st
 
@@ -9,28 +10,10 @@ VIDEOS_DIR = 'videos'
 
 LANGUAGE = 'es'
 
-MSG_LANGUAGES = {
-    'en': {
-        'app_title': 'Taekwondo combats analyzer',
-        'sidebar_header': 'Video config',
-        'video': 'Video',
-        'model': 'Model',
-        'confidence': 'Model Confidence',
-        'show_original': 'Show original video',
-        'show_analyzed': 'Show analyzed video',
-        'detect': 'Detect Objects'
-    },
-    'es': {
-        'app_title': 'Analizador de combates de taekwondo',
-        'sidebar_header': 'Configuración de vídeo',
-        'video': 'Vídeo',
-        'model': 'Modelo',
-        'confidence': 'Confianza del modelo',
-        'show_original': 'Mostrar vídeo original',
-        'show_analyzed': 'Mostrar vídeo analizado',
-        'detect': 'Detectar objectos'
-    }
-}
+with open('languages.json') as json_file:
+    file_contents = json_file.read()
+
+MSG_LANGUAGES = json.loads(file_contents)
 
 MSG = MSG_LANGUAGES[LANGUAGE]
 
