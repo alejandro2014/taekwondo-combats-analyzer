@@ -19,11 +19,9 @@ def configure_sidebar():
     with st.sidebar:
         st.header("Image/Video Config")
     
-        source_vid = st.sidebar.selectbox("Choose a video...", get_available_videos())
+        st.sidebar.selectbox("Choose a video...", get_available_videos(), key="video_chose")
 
-        confidence = float(st.slider("Select Model Confidence", 25, 100, 40)) / 100
-
-    return source_vid, confidence
+        st.slider("Select Model Confidence", 25, 100, 40, key='chosen_confidence')
 
 def get_available_videos():
     return [
@@ -42,10 +40,9 @@ def load_model(model_path):
 
 def generate_image(image):
     image = cv2.resize(image, (720, int(720*(9/16))))
+    confidence = float(st.session_state.chosen_confidence) / 100
 
     res = model.predict(image, conf=confidence)
-
-    #result_tensor = res[0].boxes
     res_plotted = res[0].plot()
 
     return res, res_plotted
@@ -76,24 +73,22 @@ def show_video(vid_cap, show=True):
 
 configure_page(title)
 
-source_vid, confidence = configure_sidebar()
+configure_sidebar()
 
 st.title(title)
 
+chosen_video = st.session_state.video_chose
+
 model = load_model(model_path)
 
-if source_vid is None:
-    exit()
-
-video_bytes = get_video_bytes(source_vid)
+video_bytes = get_video_bytes(chosen_video)
 
 if video_bytes:
     st.video(video_bytes)
 
 if st.sidebar.button('Detect Objects'):
-    vid_cap = cv2.VideoCapture("videos/combat.mp4")
+    vid_cap = cv2.VideoCapture(chosen_video)
+    
     st_frame = st.empty()
     
-    results = show_video(vid_cap, show=False)
-
-    print(results)
+    results = show_video(vid_cap, show=True)
