@@ -7,7 +7,7 @@ from ultralytics import YOLO
 MODELS_DIR = 'weights'
 VIDEOS_DIR = 'videos'
 
-LANGUAGE = 'en'
+LANGUAGE = 'es'
 
 MSG_LANGUAGES = {
     'en': {
@@ -15,10 +15,20 @@ MSG_LANGUAGES = {
         'sidebar_header': 'Video config',
         'video': 'Video',
         'model': 'Model',
-        'confidence': 'Select Model Confidence',
+        'confidence': 'Model Confidence',
         'show_original': 'Show original video',
         'show_analyzed': 'Show analyzed video',
         'detect': 'Detect Objects'
+    },
+    'es': {
+        'app_title': 'Analizador de combates de taekwondo',
+        'sidebar_header': 'Configuración de vídeo',
+        'video': 'Vídeo',
+        'model': 'Modelo',
+        'confidence': 'Confianza del modelo',
+        'show_original': 'Mostrar vídeo original',
+        'show_analyzed': 'Mostrar vídeo analizado',
+        'detect': 'Detectar objectos'
     }
 }
 
