@@ -7,16 +7,22 @@ from ultralytics import YOLO
 MODELS_DIR = 'weights'
 VIDEOS_DIR = 'videos'
 
-MSG = {
-    'app_title': 'Taekwondo combats analyzer',
-    'sidebar_header': 'Video config',
-    'video': 'Video',
-    'model': 'Model',
-    'confidence': 'Select Model Confidence',
-    'show_original': 'Show original video',
-    'show_analyzed': 'Show analyzed video',
-    'detect': 'Detect Objects'
+LANGUAGE = 'en'
+
+MSG_LANGUAGES = {
+    'en': {
+        'app_title': 'Taekwondo combats analyzer',
+        'sidebar_header': 'Video config',
+        'video': 'Video',
+        'model': 'Model',
+        'confidence': 'Select Model Confidence',
+        'show_original': 'Show original video',
+        'show_analyzed': 'Show analyzed video',
+        'detect': 'Detect Objects'
+    }
 }
+
+MSG = MSG_LANGUAGES[LANGUAGE]
 
 def configure_page():
     st.set_page_config(
