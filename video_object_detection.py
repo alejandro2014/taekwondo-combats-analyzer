@@ -7,30 +7,38 @@ from ultralytics import YOLO
 MODELS_DIR = 'weights'
 VIDEOS_DIR = 'videos'
 
-title = "Taekwondo combats analyzer"
+MSG = {
+    'app_title': 'Taekwondo combats analyzer',
+    'sidebar_header': 'Video config',
+    'video': 'Video',
+    'model': 'Model',
+    'confidence': 'Select Model Confidence',
+    'show_original': 'Show original video',
+    'show_analyzed': 'Show analyzed video',
+    'detect': 'Detect Objects'
+}
 
-def configure_page(title):
+def configure_page():
     st.set_page_config(
-        page_title=title,
-        page_icon="🤼‍♂️",
-        layout="wide",
-        initial_sidebar_state="expanded"
+        page_title = MSG['app_title'],
+        page_icon = "🤼‍♂️",
+        layout = "wide",
+        initial_sidebar_state = "expanded"
     )
 
 def configure_sidebar():
     with st.sidebar:
-        st.header("Image/Video Config")
+        st.header(MSG['sidebar_header'])
     
-        st.sidebar.selectbox("Video", get_available_videos(), key="video_chose")
-        st.sidebar.selectbox("Model", get_available_models(), key="model_chose")
+        st.selectbox(MSG['video'], get_available_videos(), key="video_chose")
+        st.selectbox(MSG['model'], get_available_models(), key="model_chose")
 
-        st.slider("Select Model Confidence", 25, 100, 40, key='chosen_confidence')
+        st.slider(MSG['confidence'], 25, 100, 40, key='chosen_confidence')
 
-        st.checkbox('Show original video', key='show_original_video')
-        st.checkbox('Show analyzed video', key='show_analyzed_video')
+        st.checkbox(MSG['show_original'], key='show_original_video')
+        st.checkbox(MSG['show_analyzed'], key='show_analyzed_video')
 
-        #if agree:
-        #    st.write('Great!')
+        st.button(MSG['detect'], key='detect_objects_button')
 
 def get_available_videos():
     return [ f'{VIDEOS_DIR}/{video}' for video in os.listdir(f'{VIDEOS_DIR}/') ]
@@ -84,18 +92,18 @@ def get_results(vid_cap):
             show = st.session_state.show_analyzed_video
 
             if show:
-                st_frame.image(res_plotted, caption='Detected Video', channels="BGR", use_column_width=True)
+                st_frame.image(res_plotted, channels="BGR", use_column_width=True)
         else:
             vid_cap.release()
             break
 
     return results
 
-configure_page(title)
+configure_page()
 
 configure_sidebar()
 
-st.title(title)
+st.title(MSG['app_title'])
 
 chosen_video = st.session_state.video_chose
 
@@ -103,7 +111,7 @@ model = load_model()
 
 show_original_video()
 
-if st.sidebar.button('Detect Objects'):
+if st.session_state.detect_objects_button:
     vid_cap = cv2.VideoCapture(chosen_video)
     
     st_frame = st.empty()
