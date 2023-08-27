@@ -26,14 +26,22 @@ def configure_sidebar():
 
         st.slider("Select Model Confidence", 25, 100, 40, key='chosen_confidence')
 
+        st.checkbox('Show original video', key='show_original_video')
+        st.checkbox('Show analyzed video', key='show_analyzed_video')
+
+        #if agree:
+        #    st.write('Great!')
+
 def get_available_videos():
     return [ f'{VIDEOS_DIR}/{video}' for video in os.listdir(f'{VIDEOS_DIR}/') ]
 
 def get_available_models():
     return [ f'{MODELS_DIR}/{model}' for model in os.listdir(f'{MODELS_DIR}/') ]
 
-def load_model(model_path):
-    try:
+def load_model():
+    model_path = st.session_state.model_chose
+
+    try:    
         model = YOLO(model_path)
     except Exception as ex:
         st.error(f"Unable to load model. Check the specified path: {model_path}")
@@ -50,13 +58,20 @@ def generate_image(image):
 
     return res, res_plotted
 
-def get_video_bytes(source_vid):
-    with open(str(source_vid), 'rb') as video_file:
+def show_original_video():
+    show_video = st.session_state.show_original_video
+
+    if not show_video:
+        return
+    
+    source_vid = st.session_state.video_chose
+
+    with open(source_vid, 'rb') as video_file:
         video_bytes = video_file.read()
 
-    return video_bytes
+    st.video(video_bytes)
 
-def show_video(vid_cap, show=True):
+def get_results(vid_cap):
     results = []
 
     while (vid_cap.isOpened()):
@@ -65,6 +80,8 @@ def show_video(vid_cap, show=True):
         if success:
             res, res_plotted = generate_image(image)
             results.append(res)
+
+            show = st.session_state.show_analyzed_video
 
             if show:
                 st_frame.image(res_plotted, caption='Detected Video', channels="BGR", use_column_width=True)
@@ -80,19 +97,15 @@ configure_sidebar()
 
 st.title(title)
 
-chosen_model = st.session_state.model_chose
 chosen_video = st.session_state.video_chose
 
-model = load_model(chosen_model)
+model = load_model()
 
-video_bytes = get_video_bytes(chosen_video)
-
-if video_bytes:
-    st.video(video_bytes)
+show_original_video()
 
 if st.sidebar.button('Detect Objects'):
     vid_cap = cv2.VideoCapture(chosen_video)
     
     st_frame = st.empty()
     
-    results = show_video(vid_cap, show=True)
+    results = get_results(vid_cap)
