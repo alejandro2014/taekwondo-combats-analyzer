@@ -4,12 +4,10 @@ import streamlit as st
 
 from ultralytics import YOLO
 
+MODELS_DIR = 'weights'
 VIDEOS_DIR = 'videos'
 
 title = "Taekwondo combats analyzer"
-
-#model_path = "weights/yolov8n.pt"
-model_path = 'weights/yolov8n-pose.pt'
 
 def configure_page(title):
     st.set_page_config(
@@ -23,12 +21,16 @@ def configure_sidebar():
     with st.sidebar:
         st.header("Image/Video Config")
     
-        st.sidebar.selectbox("Choose a video...", get_available_videos(), key="video_chose")
+        st.sidebar.selectbox("Video", get_available_videos(), key="video_chose")
+        st.sidebar.selectbox("Model", get_available_models(), key="model_chose")
 
         st.slider("Select Model Confidence", 25, 100, 40, key='chosen_confidence')
 
 def get_available_videos():
     return [ f'{VIDEOS_DIR}/{video}' for video in os.listdir(f'{VIDEOS_DIR}/') ]
+
+def get_available_models():
+    return [ f'{MODELS_DIR}/{model}' for model in os.listdir(f'{MODELS_DIR}/') ]
 
 def load_model(model_path):
     try:
@@ -78,9 +80,10 @@ configure_sidebar()
 
 st.title(title)
 
+chosen_model = st.session_state.model_chose
 chosen_video = st.session_state.video_chose
 
-model = load_model(model_path)
+model = load_model(chosen_model)
 
 video_bytes = get_video_bytes(chosen_video)
 
