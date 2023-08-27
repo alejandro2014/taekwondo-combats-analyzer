@@ -1,6 +1,10 @@
 import cv2
+import os
 import streamlit as st
+
 from ultralytics import YOLO
+
+VIDEOS_DIR = 'videos'
 
 title = "Taekwondo combats analyzer"
 
@@ -24,10 +28,7 @@ def configure_sidebar():
         st.slider("Select Model Confidence", 25, 100, 40, key='chosen_confidence')
 
 def get_available_videos():
-    return [
-        "videos/combat.mp4",
-        "videos/office-video.mp4"
-    ]
+    return [ f'{VIDEOS_DIR}/{video}' for video in os.listdir(f'{VIDEOS_DIR}/') ]
 
 def load_model(model_path):
     try:
