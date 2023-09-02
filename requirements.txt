@@ -1,4 +1,4 @@
 backports.lzma
-#pafy
+joblib
 streamlit
 ultralytics

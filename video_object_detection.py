@@ -1,4 +1,5 @@
 import cv2
+import joblib
 import json
 import os
 import streamlit as st
@@ -62,6 +63,7 @@ def generate_image(image):
 
     res = model.predict(image, conf=confidence)
     res_plotted = res[0].plot()
+    res = res[0].keypoints.xyn.tolist()
 
     return res, res_plotted
 
@@ -81,20 +83,20 @@ def show_original_video():
 def get_results(vid_cap):
     results = []
 
+    show = st.session_state.show_analyzed_video
+
     while (vid_cap.isOpened()):
         success, image = vid_cap.read()
 
-        if success:
-            res, res_plotted = generate_image(image)
-            results.append(res)
-
-            show = st.session_state.show_analyzed_video
-
-            if show:
-                st_frame.image(res_plotted, channels="BGR", use_column_width=True)
-        else:
+        if not success:
             vid_cap.release()
             break
+
+        res, res_plotted = generate_image(image)
+        results.append(res)
+
+        if show:
+            st_frame.image(res_plotted, channels="BGR", use_column_width=True)
 
     return results
 
@@ -116,3 +118,5 @@ if st.session_state.detect_objects_button:
     st_frame = st.empty()
     
     results = get_results(vid_cap)
+
+    joblib.dump(results, 'combat-capture.sav')
