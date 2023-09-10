@@ -3,72 +3,30 @@ import joblib
 
 from ultralytics import YOLO
 
-def get_video_capture(video_path):
-    return cv2.VideoCapture(video_path)
-
-def get_properties(video_capture):
-    properties_names = [ 'FPS', 'FRAME_COUNT', 'FRAME_HEIGHT', 'FRAME_WIDTH' ]
-
-    return {
-        property: video_capture.get(getattr(cv2, f'CAP_PROP_{property}'))
-        for property in properties_names
-    }
+from video_data_extractor import VideoDataExtractor
 
 def load_yolo_model(model_path):
-    try:
-        model = YOLO(model_path)
-    except Exception as ex:
-        print(f"[ERROR] Unable to load model. Check the specified path: {model_path}")
-        print(ex)
+        try:
+            model = YOLO(model_path)
+        except Exception as ex:
+            print(f"[ERROR] Unable to load model. Check the specified path: {model_path}")
+            print(ex)
 
-    return model
+        return model
 
-def generate_frame_result(image, model, confidence=0.4):
-    image = cv2.resize(image, (720, int(720 * (9 / 16))))
-
-    res = model.predict(image, conf=confidence)
-
-    return  res[0].keypoints.xyn.tolist()
-
-def get_results(video_capture, yolo_model):
-    results = []
-
-    while (video_capture.isOpened()):
-        success, image = video_capture.read()
-
-        if not success:
-            video_capture.release()
-            break
-
-        res = generate_frame_result(image, yolo_model)
-        results.append(res)
-
-    return results
-
-def get_video_information(video_path, yolo_model):
-    video_capture = get_video_capture(video_path)
-
-    return {
-        'path': video_path,
-        'properties': get_properties(video_capture),
-        'results': get_results(video_capture, yolo_model)
-    }
-
-video_path = 'videos/combat.mp4'
 yolo_model = load_yolo_model('weights/yolov8n-pose.pt')
 
-video_information = get_video_information(video_path, yolo_model)
+video_path = 'videos/combat.mp4'
+
+data_extractor = VideoDataExtractor(yolo_model)
+
+video_information = data_extractor.get_video_information(video_path)
 
 joblib.dump(video_information, 'combat-capture.sav')
 
 vid_info = joblib.load('combat-capture.sav')
 
 print(vid_info)
-
-exit()
-print(video_path)
-print(properties)
-print(results)
 
 exit()
 
