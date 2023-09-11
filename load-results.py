@@ -1,30 +1,47 @@
-import cv2
+from datetime import datetime
+
+import argparse
 import joblib
 
 from model_loader import load_yolo_model
 
-from ultralytics import YOLO
-
 from video_data_extractor import VideoDataExtractor
+
+def get_arguments():
+    parser = argparse.ArgumentParser(description='Extracts information of the provided video')
+
+    parser.add_argument('--input-video', help='Name of the video')
+    parser.add_argument('--yolo-model', default='yolov8n-pose.pt', help='YOLO model to use')
+
+    return parser.parse_args()
+
+def get_video_output_name(input_video):
+    now = datetime.now()
+
+    timestamp = now.strftime("%Y%m%d-%H%M%S")
+
+    return f"{input_video.split('.')[0]}-{timestamp}.sav"
+
+args = get_arguments()
+
+input_video_path = f'videos/{args.input_video}'
+output_video_path = f'videos/output/{get_video_output_name(args.input_video)}'
+
+yolo_model_path = f'weights/{args.yolo_model}'
+yolo_model = load_yolo_model(yolo_model_path)
+
+data_extractor = VideoDataExtractor(yolo_model)
+
+video_information = data_extractor.get_video_information(input_video_path)
+
+joblib.dump(video_information, output_video_path)
+
+exit()
 
 def load_video_info(info_path):
     return joblib.load(info_path)
 
-yolo_model = load_yolo_model('weights/yolov8n-pose.pt')
-
-video_path = 'videos/combat.mp4'
-
-data_extractor = VideoDataExtractor(yolo_model)
-
-video_information = data_extractor.get_video_information(video_path)
-
-joblib.dump(video_information, 'combat-capture.sav')
-
 vid_info = load_video_info('combat-capture.sav')
-
-print(vid_info)
-
-exit()
 
 import joblib
 import numpy as np
