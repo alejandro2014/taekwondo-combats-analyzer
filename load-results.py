@@ -6,13 +6,13 @@ from ultralytics import YOLO
 from video_data_extractor import VideoDataExtractor
 
 def load_yolo_model(model_path):
-        try:
-            model = YOLO(model_path)
-        except Exception as ex:
-            print(f"[ERROR] Unable to load model. Check the specified path: {model_path}")
-            print(ex)
+    try:
+        model = YOLO(model_path)
+    except Exception as ex:
+        print(f"[ERROR] Unable to load model. Check the specified path: {model_path}")
+        print(ex)
 
-        return model
+    return model
 
 yolo_model = load_yolo_model('weights/yolov8n-pose.pt')
 

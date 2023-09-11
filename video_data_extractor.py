@@ -1,9 +1,11 @@
 import cv2
 
 class VideoDataExtractor:
-    def __init__(self, model, confidence=0.4):
+    def __init__(self, model, confidence=0.4, visual=False, st_frame=None):
         self.model = model
         self.confidence = confidence
+        self.visual = visual
+        self.st_frame = st_frame
 
     def get_video_information(self, video_path):
         video_capture = self.get_video_capture(video_path)
@@ -40,9 +42,14 @@ class VideoDataExtractor:
     def generate_frame_result(self, image, model):
         image = self.resize_frame(image)
         
-        res = model.predict(image, conf=self.confidence)
+        result = model.predict(image, conf=self.confidence)
 
-        return  res[0].keypoints.xyn.tolist()
+        result_info = result[0].keypoints.xyn.tolist()
+
+        if self.visual:
+            self.st_frame.image(result[0].plot(), channels="BGR", use_column_width=True)
+            
+        return  result_info
 
     def get_video_capture(self, video_path):
         return cv2.VideoCapture(video_path)

@@ -6,18 +6,29 @@ import streamlit as st
 
 from ultralytics import YOLO
 
+from video_data_extractor import VideoDataExtractor
+
+LANGUAGE = 'es'
 MODELS_DIR = 'weights'
 VIDEOS_DIR = 'videos'
 
-LANGUAGE = 'es'
+def load_messages(language):
+    with open('languages.json') as json_file:
+        file_contents = json_file.read()
 
-with open('languages.json') as json_file:
-    file_contents = json_file.read()
+    msg_languages = json.loads(file_contents)
 
-MSG_LANGUAGES = json.loads(file_contents)
+    return msg_languages[language]
 
-MSG = MSG_LANGUAGES[LANGUAGE]
+def get_available_files(root_dir):
+    return [ f'{root_dir}/{file}' for file in os.listdir(f'{root_dir}/') ]
 
+def get_available_videos():
+    return get_available_files(VIDEOS_DIR)
+
+def get_available_models():
+    return get_available_files(MODELS_DIR)
+    
 def configure_page():
     st.set_page_config(
         page_title = MSG['app_title'],
@@ -25,6 +36,8 @@ def configure_page():
         layout = "wide",
         initial_sidebar_state = "expanded"
     )
+
+    st.title(MSG['app_title'])
 
 def configure_sidebar():
     with st.sidebar:
@@ -40,33 +53,6 @@ def configure_sidebar():
 
         st.button(MSG['detect'], key='detect_objects_button')
 
-def get_available_videos():
-    return [ f'{VIDEOS_DIR}/{video}' for video in os.listdir(f'{VIDEOS_DIR}/') ]
-
-def get_available_models():
-    return [ f'{MODELS_DIR}/{model}' for model in os.listdir(f'{MODELS_DIR}/') ]
-
-def load_model():
-    model_path = st.session_state.model_chose
-
-    try:    
-        model = YOLO(model_path)
-    except Exception as ex:
-        st.error(f"Unable to load model. Check the specified path: {model_path}")
-        st.error(ex)
-
-    return model
-
-def generate_image(image):
-    image = cv2.resize(image, (720, int(720*(9/16))))
-    confidence = float(st.session_state.chosen_confidence) / 100
-
-    res = model.predict(image, conf=confidence)
-    res_plotted = res[0].plot()
-    res = res[0].keypoints.xyn.tolist()
-
-    return res, res_plotted
-
 def show_original_video():
     show_video = st.session_state.show_original_video
 
@@ -80,43 +66,30 @@ def show_original_video():
 
     st.video(video_bytes)
 
-def get_results(vid_cap):
-    results = []
+def load_yolo_model(model_path):
+    try:
+        model = YOLO(model_path)
+    except Exception as ex:
+        print(f"[ERROR] Unable to load model. Check the specified path: {model_path}")
+        print(ex)
 
-    show = st.session_state.show_analyzed_video
+    return model
 
-    while (vid_cap.isOpened()):
-        success, image = vid_cap.read()
-
-        if not success:
-            vid_cap.release()
-            break
-
-        res, res_plotted = generate_image(image)
-        results.append(res)
-
-        if show:
-            st_frame.image(res_plotted, channels="BGR", use_column_width=True)
-
-    return results
+MSG = load_messages(LANGUAGE)
 
 configure_page()
-
 configure_sidebar()
 
-st.title(MSG['app_title'])
-
-chosen_video = st.session_state.video_chose
-
-model = load_model()
+video_path = st.session_state.video_chose
+yolo_model = load_yolo_model(st.session_state.model_chose)
 
 show_original_video()
 
 if st.session_state.detect_objects_button:
-    vid_cap = cv2.VideoCapture(chosen_video)
-    
     st_frame = st.empty()
-    
-    results = get_results(vid_cap)
 
-    joblib.dump(results, 'combat-capture.sav')
+    data_extractor = VideoDataExtractor(yolo_model, visual=True, st_frame=st_frame)
+
+    video_information = data_extractor.get_video_information(video_path)
+
+    joblib.dump(video_information, 'combat-capture.sav')
