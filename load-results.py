@@ -1,18 +1,14 @@
 import cv2
 import joblib
 
+from model_loader import load_yolo_model
+
 from ultralytics import YOLO
 
 from video_data_extractor import VideoDataExtractor
 
-def load_yolo_model(model_path):
-    try:
-        model = YOLO(model_path)
-    except Exception as ex:
-        print(f"[ERROR] Unable to load model. Check the specified path: {model_path}")
-        print(ex)
-
-    return model
+def load_video_info(info_path):
+    return joblib.load(info_path)
 
 yolo_model = load_yolo_model('weights/yolov8n-pose.pt')
 
@@ -24,7 +20,7 @@ video_information = data_extractor.get_video_information(video_path)
 
 joblib.dump(video_information, 'combat-capture.sav')
 
-vid_info = joblib.load('combat-capture.sav')
+vid_info = load_video_info('combat-capture.sav')
 
 print(vid_info)
 
@@ -60,27 +56,3 @@ end_frame = 13
 results = [ get_fighters_for_frame(frames, i) for i in range(start_frame, end_frame + 1) ]
 
 print(results)
-
-exit()
-
-print('===========================')
-print(np.mean(np.abs(frame_1[0] - frame_2[0])))
-print('===========================')
-print(np.mean(np.abs(frame_1[0] - frame_2[1])))
-
-"""
-fighter_red = frame_1[0]
-fighter_blue = frame_1[1]
-
-print(fighter_red)
-
-print('================')
-print(fighter_red)
-print('================')
-print(fighter_blue)
-"""
-
-exit()
-
-for i, result in enumerate(results):
-    print(f'{i} - {len(result)}')

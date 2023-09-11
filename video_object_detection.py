@@ -1,10 +1,9 @@
-import cv2
 import joblib
 import json
 import os
 import streamlit as st
 
-from ultralytics import YOLO
+from model_loader import load_yolo_model
 
 from video_data_extractor import VideoDataExtractor
 
@@ -65,15 +64,6 @@ def show_original_video():
         video_bytes = video_file.read()
 
     st.video(video_bytes)
-
-def load_yolo_model(model_path):
-    try:
-        model = YOLO(model_path)
-    except Exception as ex:
-        print(f"[ERROR] Unable to load model. Check the specified path: {model_path}")
-        print(ex)
-
-    return model
 
 MSG = load_messages(LANGUAGE)
 
