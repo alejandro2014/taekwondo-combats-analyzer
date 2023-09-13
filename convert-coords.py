@@ -46,23 +46,40 @@ def process_person_info(person, previous_frame):
 
     return (person, person_area, deltas)
 
+def add_persons_information(input_frames):
+    output_frames = []
+
+    for i, frame in enumerate(input_frames):
+        if i == 0:
+            continue
+
+        persons_info = [ process_person_info(person, input_frames[i - 1]) for person in frame ]
+        output_frames.append(persons_info)
+
+    return output_frames
+
+def sort_persons_in_frames(input_frames):
+    print(len(input_frames))
+    output_frames = []
+
+    for frame in input_frames:
+        for person in frame:
+            deltas = person[2]
+            minimum = np.array(deltas).argmin()
+
+            output_frames.append((person[0], person[1], minimum))
+
+    return output_frames
+
 args = get_arguments()
 
 vid_info = load_video_info(args.input_data_file)
+frames = vid_info['results']
 
-input_frames = vid_info['results']#[1:]
-output_frames = []
+frames = add_persons_information(frames)
+frames = sort_persons_in_frames(frames)
 
-for i, frame in enumerate(input_frames):
-    if i == 0:
-        continue
-
-    print(f'Processing frame {i}')
-
-    persons_info = [ process_person_info(person, input_frames[i - 1]) for person in frame ]
-    output_frames.append(persons_info)
-        
-print(output_frames)
+print(frames[1:10])
 
 exit()
 
