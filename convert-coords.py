@@ -35,6 +35,9 @@ def get_person_area(person):
     return abs(max_x - min_x) * abs(max_y - min_y)
 
 def get_person_delta(person1, person2):
+    if len(person1) == 0 or len(person2) == 0:
+        return 0
+    
     return np.mean(np.abs(np.array(person1) - np.array(person2)))
 
 def process_person_info(person, previous_frame):
@@ -47,10 +50,15 @@ args = get_arguments()
 
 vid_info = load_video_info(args.input_data_file)
 
-input_frames = vid_info['results'][1:10]
+input_frames = vid_info['results']#[1:]
 output_frames = []
 
 for i, frame in enumerate(input_frames):
+    if i == 0:
+        continue
+
+    print(f'Processing frame {i}')
+
     persons_info = [ process_person_info(person, input_frames[i - 1]) for person in frame ]
     output_frames.append(persons_info)
         
