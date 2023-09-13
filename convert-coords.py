@@ -3,8 +3,6 @@ import joblib
 
 import numpy as np
 
-[[(person, area, previous)]] = None
-
 def get_arguments():
     parser = argparse.ArgumentParser(description='Sorts and filters the information of the fighters')
 
@@ -15,11 +13,11 @@ def get_arguments():
 def load_video_info(info_path):
     return joblib.load(info_path)
 
-def calculate_person_area(person):
-    min_x = 1
-    max_x = -1
-    min_y = 1
-    max_y = -1
+def get_person_area(person):
+    min_x = 0
+    max_x = 0
+    min_y = 0
+    max_y = 0
 
     for point in person:
         if point[0] < min_x:
@@ -36,6 +34,31 @@ def calculate_person_area(person):
 
     return abs(max_x - min_x) * abs(max_y - min_y)
 
+def get_person_delta(person1, person2):
+    return np.mean(np.abs(np.array(person1) - np.array(person2)))
+
+def process_person_info(person, previous_frame):
+    deltas = [ get_person_delta(person, previous_person) for previous_person in previous_frame ]
+    person_area = get_person_area(person)
+
+    return (person, person_area, deltas)
+
+args = get_arguments()
+
+vid_info = load_video_info(args.input_data_file)
+
+input_frames = vid_info['results'][1:10]
+output_frames = []
+
+for i, frame in enumerate(input_frames):
+    persons_info = [ process_person_info(person, input_frames[i - 1]) for person in frame ]
+    output_frames.append(persons_info)
+        
+print(output_frames)
+
+exit()
+
+"""
 def calculate_delta(person1, person2):
     return np.mean(np.abs(person1 - person2))
     
@@ -45,32 +68,7 @@ def find_matches_previous_frame(person, candidates):
     minimum = np.array(deltas).argmin()
 
     return person, minimum
-        
-
-args = get_arguments()
-
-vid_info = load_video_info(args.input_data_file)
-
-print(vid_info['path'])
-print(vid_info['properties'])
-
-frames_info = []
-
-for i, result in enumerate(vid_info['results']):
-    print('-------------------------------')
-    print(f'Frame {i}')
-
-    frames_info.append([])
-
-    for person in result:
-        print(calculate_person_area(person))
-
-        if i > 0:
-            find_matches_previous_frame(person, result[i - 1])
-        else:
-            frames_info.append(person)
-
-exit()
+"""
 
 def convert_point(point):
     coord1_transf = int(point[0] * 1000) * 10000
