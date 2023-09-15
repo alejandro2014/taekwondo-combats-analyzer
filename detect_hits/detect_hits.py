@@ -1,15 +1,19 @@
-import random
 import joblib
-"""
-import numpy as np
-
-from sklearn.metrics import accuracy_score
-from sklearn.model_selection import train_test_split
-from sklearn.svm import SVC
-"""
+import random
 
 def load_video_info(info_path):
     return joblib.load(info_path)
+
+def flatten_fighters_list(frame):
+    points = []
+
+    for person in frame:
+        for point in person:
+            new_point = int(str(int(point[0] * 10000)) + str(int(point[1] * 10000)))
+
+            points.append(new_point)
+
+    return points
 
 def get_indexes():
     length_video_frames = 9009
@@ -36,9 +40,50 @@ def get_indexes():
 
     return nohit_train, nohit_test, hit_train_frames, hit_test_frames
 
+def get_persons_by_indices(frames, indices):
+    return [ flatten_fighters_list(frames[i]) for i in indices ]
+
+video_info = load_video_info('combat3-20230911-210657.sav')
+
+flat_results = [ flatten_fighters_list(frame) for frame in video_info['results'] ]
+
 nohit_train, nohit_test, hit_train_frames, hit_test_frames = get_indexes()
 
-#video_info = load_video_info('./output-combat3-20230911-210657.sav')
+frames = video_info['results']
+
+new_list = get_persons_by_indices(frames, nohit_train)
+print(new_list)
+
+new_list = get_persons_by_indices(frames, nohit_test)
+print(new_list)
+
+new_list = get_persons_by_indices(frames, hit_train_frames)
+print(new_list)
+
+new_list = get_persons_by_indices(frames, hit_test_frames)
+print(new_list)
+
+exit()
+
+"""
+import numpy as np
+
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+"""
+nohit_train, nohit_test, hit_train_frames, hit_test_frames = get_indexes()
+
+video_info = load_video_info('./output-combat3-20230911-210657.sav')
+
+for i in range(10):
+    print(len(video_info[i]))
+
+frame1 = video_info[0].array[nohit_train[0]]
+frame2 = video_info[1].array[nohit_train[0]]
+
+print(frame1)
+print(frame2)
 
 exit()
 # Supongamos que tienes un conjunto de datos etiquetado con listas de pose y etiquetas de golpe (0 o 1).
