@@ -70,24 +70,3 @@ class Timeline:
                 str1 += f'Person -> {person}\n'
 
         return str1
-    
-    def get_available_queues(self):
-        return []
-    
-"""
-available_queues = get_available_queues()
-
-available_queues = [ 0, 1, 2, 3, 4, 5 ]
-
-def insert_in_queue(queue, element):
-    available_queues.remove(2)
-
-print(available_queues)
-
-insert_in_queue(2, None)
-
-print(available_queues)
-
-
-exit()
-"""

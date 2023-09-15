@@ -57,7 +57,7 @@ def sort_persons_in_frames(input_frames):
     
 args = get_arguments()
 vid_info = load_video_info(args.input_data_file)
-frames = vid_info['results'][:10]
+frames = vid_info['results'][:100]
 
 timeline = Timeline(persons_number=5)
 
