@@ -8,13 +8,16 @@ class Timeline:
         self.persons_number = persons_number
         self.deltas = [ None ] * persons_number
         self.persons_queues = [ ]
+        self.current_frame = 0
 
         for _ in range(persons_number):
             self.persons_queues.append(Queue())
 
     def insert_frames(self, frames):
         for frame in frames:
+            print(self.current_frame)
             self.insert_persons(frame)
+            self.current_frame += 1
 
     def insert_persons(self, persons):
         if not persons[0]:
@@ -29,17 +32,14 @@ class Timeline:
         for i in available_queues:
             self.persons_queues[i].append(None)
 
-        print(self)
-
     def get_queue(self, person, available_queues):
         last_persons = self.get_last_persons(available_queues)
         deltas = [ self.calculate_delta(person, previous_person) for previous_person in last_persons ]
         chosen_delta = np.array(deltas).argmin()
-        chosen_queue_index = available_queues[chosen_delta]
     
-        del available_queues[chosen_queue_index]
+        del available_queues[chosen_delta]
 
-        return self.persons_queues[chosen_queue_index], available_queues
+        return self.persons_queues[chosen_delta], available_queues
     
     def get_last_persons(self, available_queues):
         queues = [ self.persons_queues[i] for i in available_queues ]
