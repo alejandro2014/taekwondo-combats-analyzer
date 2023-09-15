@@ -1,4 +1,5 @@
 backports.lzma
 joblib
+sklearn
 streamlit
 ultralytics
