@@ -1,3 +1,4 @@
+import joblib
 import numpy as np
 
 from person_queue import Queue
@@ -58,6 +59,9 @@ class Timeline:
         
         return np.mean(np.abs(np.array(person1) - np.array(person2)))
     
+    def write_to_file(self, output_data_file):
+        joblib.dump(self.persons_queues, output_data_file)
+
     def __str__(self):
         str1 = 'TIMELINE\n'
         str1 += '========\n'
