@@ -19,8 +19,8 @@ args = get_arguments()
 vid_info = load_video_info(args.input_data_file)
 frames = vid_info['results']
 
-info_printer = FramesInfoPrinter()
-info_printer.show_frames_info(frames)
+#info_printer = FramesInfoPrinter()
+#info_printer.show_frames_info(frames)
 
 timeline = Timeline(persons_number=10)
 timeline.insert_frames(frames)

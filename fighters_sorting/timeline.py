@@ -1,18 +1,3 @@
-"""
-list1 = [ 4, 9, 1, 6, 8 ]
-
-print(list1)
-
-del list1[2]
-
-print(list1)
-
-list1.remove(9)
-
-print(list1)
-
-exit()
-"""
 import joblib
 import numpy as np
 
@@ -20,45 +5,43 @@ from person_queue import Queue
 
 class Timeline:
     def __init__(self, persons_number=10):
-        self.frame_number = 0
         self.persons_number = persons_number
         self.deltas = [ None ] * persons_number
         self.persons_queues = [ ]
-        self.frame_number = 0
 
         for _ in range(persons_number):
             self.persons_queues.append(Queue())
 
     def insert_frames(self, frames):
-        for i, frame in enumerate(frames[:20]):
-            print(f'-------- Frame {i} ({len(frame)} persons) --------')
+        total_frames = len(frames)
+
+        for i, frame in enumerate(frames):
+            print(f'Processing frames: {int(i / total_frames * 100)}%   ', end='\r')
             self.insert_persons(frame)
-            self.print_frame()
 
-            self.frame_number += 1
-
-    def print_frame(self):
-        for i, queue in enumerate(self.persons_queues):
-            print(f'Q{i}: {len(queue)} {sum(x is None for x in queue.array)}')
+        print()
 
     def insert_persons(self, persons):
         if not persons[0]:
-            print('EMPTY FRAME')
             for queue in self.persons_queues:
                 queue.append(None)
 
             return
 
+        available_queues = self.insert_normal_persons(persons)
+
+        self.insert_none_persons(available_queues)
+
+    def insert_normal_persons(self, persons):
         available_queues = list(range(len(self.persons_queues)))
-        print(f'Available queues: {available_queues}')
-        
-        for i, person in enumerate(persons):
+
+        for person in persons:
             queue_position = self.get_queue_number(person, available_queues)
-            print(f'Deleting from queue {queue_position}')
-
             available_queues = self.insert_person(queue_position, person, available_queues)
-            print(f'Available queues: {available_queues}')
+        
+        return available_queues
 
+    def insert_none_persons(self, available_queues):
         for i in available_queues:
             self.persons_queues[i].append(None)
 
@@ -76,10 +59,6 @@ class Timeline:
         min_delta_position = np.array(deltas).argmin()
 
         return available_queues[min_delta_position]
-    
-        #del available_queues[chosen_delta]
-
-        #return self.persons_queues[chosen_delta], available_queues
     
     def get_last_persons(self, available_queues):
         queues = [ self.persons_queues[i] for i in available_queues ]
