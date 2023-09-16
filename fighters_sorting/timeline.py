@@ -1,3 +1,18 @@
+"""
+list1 = [ 4, 9, 1, 6, 8 ]
+
+print(list1)
+
+del list1[2]
+
+print(list1)
+
+list1.remove(9)
+
+print(list1)
+
+exit()
+"""
 import joblib
 import numpy as np
 
@@ -9,38 +24,62 @@ class Timeline:
         self.persons_number = persons_number
         self.deltas = [ None ] * persons_number
         self.persons_queues = [ ]
-        self.current_frame = 0
+        self.frame_number = 0
 
         for _ in range(persons_number):
             self.persons_queues.append(Queue())
 
     def insert_frames(self, frames):
-        for frame in frames:
-            print(self.current_frame)
+        for i, frame in enumerate(frames[:20]):
+            print(f'-------- Frame {i} ({len(frame)} persons) --------')
             self.insert_persons(frame)
-            self.current_frame += 1
+            self.print_frame()
+
+            self.frame_number += 1
+
+    def print_frame(self):
+        for i, queue in enumerate(self.persons_queues):
+            print(f'Q{i}: {len(queue)} {sum(x is None for x in queue.array)}')
 
     def insert_persons(self, persons):
         if not persons[0]:
+            print('EMPTY FRAME')
+            for queue in self.persons_queues:
+                queue.append(None)
+
             return
 
         available_queues = list(range(len(self.persons_queues)))
+        print(f'Available queues: {available_queues}')
         
-        for person in persons:
-            queue, available_queues = self.get_queue(person, available_queues)
-            queue.append(person)
+        for i, person in enumerate(persons):
+            queue_position = self.get_queue_number(person, available_queues)
+            print(f'Deleting from queue {queue_position}')
+
+            available_queues = self.insert_person(queue_position, person, available_queues)
+            print(f'Available queues: {available_queues}')
 
         for i in available_queues:
             self.persons_queues[i].append(None)
 
-    def get_queue(self, person, available_queues):
-        last_persons = self.get_last_persons(available_queues)
-        deltas = [ self.calculate_delta(person, previous_person) for previous_person in last_persons ]
-        chosen_delta = np.array(deltas).argmin()
-    
-        del available_queues[chosen_delta]
+    def insert_person(self, queue_position, person, available_queues):
+        queue = self.persons_queues[queue_position]
+        queue.append(person)
+        available_queues.remove(queue_position)
 
-        return self.persons_queues[chosen_delta], available_queues
+        return available_queues
+
+    def get_queue_number(self, person, available_queues):
+        previous_persons = self.get_last_persons(available_queues)
+        deltas = [ self.calculate_delta(person, previous_person) for previous_person in previous_persons ]
+
+        min_delta_position = np.array(deltas).argmin()
+
+        return available_queues[min_delta_position]
+    
+        #del available_queues[chosen_delta]
+
+        #return self.persons_queues[chosen_delta], available_queues
     
     def get_last_persons(self, available_queues):
         queues = [ self.persons_queues[i] for i in available_queues ]
