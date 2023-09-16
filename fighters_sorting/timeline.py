@@ -13,13 +13,8 @@ class Timeline:
             self.persons_queues.append(Queue())
 
     def insert_frames(self, frames):
-        total_frames = len(frames)
-
-        for i, frame in enumerate(frames):
-            print(f'Processing frames: {int(i / total_frames * 100)}%   ', end='\r')
+        for frame in frames:
             self.insert_persons(frame)
-
-        print()
 
     def insert_persons(self, persons):
         if not persons[0]:
