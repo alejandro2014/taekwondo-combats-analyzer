@@ -1,6 +1,7 @@
-
 import argparse
 import joblib
+
+import numpy as np
 
 from info_printer import FramesInfoPrinter
 from timeline import Timeline
@@ -27,3 +28,22 @@ timeline.insert_frames(frames)
 
 output_data_file = f'output-{args.input_data_file}'
 timeline.write_to_file(output_data_file)
+
+exit()
+
+def calculate_delta(person1, person2):
+    if person1 is None or person2 is None:
+        return 0
+
+    return round(np.mean(np.abs(np.array(person1) - np.array(person2))), 5)
+
+def show_queues(queue):
+    elements = [ e for e in queue.array ]
+
+    for j in range(len(elements)):
+        if j == 0:
+            continue
+
+        delta = calculate_delta(elements[j], elements[j - 1])
+
+        print(delta)
