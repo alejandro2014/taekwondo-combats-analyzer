@@ -1,6 +1,8 @@
+
 import argparse
 import joblib
 
+from info_printer import FramesInfoPrinter
 from timeline import Timeline
 
 def get_arguments():
@@ -12,15 +14,16 @@ def get_arguments():
 
 def load_video_info(info_path):
     return joblib.load(info_path)
-    
+
 args = get_arguments()
 vid_info = load_video_info(args.input_data_file)
 frames = vid_info['results']
 
-timeline = Timeline(persons_number=10)
+info_printer = FramesInfoPrinter()
+info_printer.show_frames_info(frames)
 
+timeline = Timeline(persons_number=10)
 timeline.insert_frames(frames)
 
 output_data_file = f'output-{args.input_data_file}'
-
 timeline.write_to_file(output_data_file)

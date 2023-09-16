@@ -1,6 +1,12 @@
 import joblib
 import random
 
+import numpy as np
+
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+
 def load_video_info(info_path):
     return joblib.load(info_path)
 
@@ -51,55 +57,22 @@ nohit_train, nohit_test, hit_train_frames, hit_test_frames = get_indexes()
 
 frames = video_info['results']
 
-new_list = get_persons_by_indices(frames, nohit_train)
-print(new_list)
+nohit_train = get_persons_by_indices(frames, nohit_train)
+hit_train_frames = get_persons_by_indices(frames, hit_train_frames)
 
-new_list = get_persons_by_indices(frames, nohit_test)
-print(new_list)
+nohit_test = get_persons_by_indices(frames, nohit_test)
+hit_test_frames = get_persons_by_indices(frames, hit_test_frames)
 
-new_list = get_persons_by_indices(frames, hit_train_frames)
-print(new_list)
+X = nohit_train + hit_train_frames + nohit_test + hit_test_frames
+y = [0] * len(nohit_train) + [1] * len(hit_train_frames) + [0] * len(nohit_test) + [1] * len(hit_test_frames)
 
-new_list = get_persons_by_indices(frames, hit_test_frames)
-print(new_list)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.125, random_state=52)
 
-exit()
-
-"""
-import numpy as np
-
-from sklearn.metrics import accuracy_score
-from sklearn.model_selection import train_test_split
-from sklearn.svm import SVC
-"""
-nohit_train, nohit_test, hit_train_frames, hit_test_frames = get_indexes()
-
-video_info = load_video_info('./output-combat3-20230911-210657.sav')
-
-for i in range(10):
-    print(len(video_info[i]))
-
-frame1 = video_info[0].array[nohit_train[0]]
-frame2 = video_info[1].array[nohit_train[0]]
-
-print(frame1)
-print(frame2)
-
-exit()
-# Supongamos que tienes un conjunto de datos etiquetado con listas de pose y etiquetas de golpe (0 o 1).
-# X_train es una matriz de listas de pose y y_train es un array de etiquetas.
-
-# Divide el conjunto de datos en entrenamiento y prueba
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# Entrena un modelo de Máquinas de Vectores de Soporte (SVM)
 svm_model = SVC(kernel='linear', C=1)
 svm_model.fit(X_train, y_train)
 
-# Realiza predicciones en el conjunto de prueba
 y_pred = svm_model.predict(X_test)
 
-# Evalúa el rendimiento del modelo
 accuracy = accuracy_score(y_test, y_pred)
 print("Precisión del modelo:", accuracy)
 
