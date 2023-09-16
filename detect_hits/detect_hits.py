@@ -1,4 +1,5 @@
 import joblib
+"""
 import random
 
 import numpy as np
@@ -6,10 +7,33 @@ import numpy as np
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
+"""
 
 def load_video_info(info_path):
     return joblib.load(info_path)
 
+def get_frames_number(video_info):
+    return len(video_info[0])
+
+def get_frames_without_hit(frames_number, frames_with_hit):
+    frames = list(range(frames_number))
+
+    for i in frames_with_hit:
+        frames.remove(i)
+
+    return frames
+
+video_info = load_video_info('output-combat3-20230911-210657.sav')
+frames_number = get_frames_number(video_info)
+
+frames_with_hit = [430, 447, 550, 1076, 1432, 2391, 6479, 7110]
+frames_without_hit = get_frames_without_hit(frames_number, frames_with_hit)
+
+ratio_train_test = 0.125
+
+print(frames_number)
+
+exit()
 def flatten_fighters_list(frame):
     points = []
 
