@@ -1,7 +1,7 @@
 import joblib
-"""
 import random
 
+"""
 import numpy as np
 
 from sklearn.metrics import accuracy_score
@@ -23,17 +23,44 @@ def get_frames_without_hit(frames_number, frames_with_hit):
 
     return frames
 
+def list_splitter(frames, ratio):
+    elements = len(frames)
+    middle = int(elements * ratio)
+
+    return [frames[:middle], frames[middle:]]
+
+def separate_frames(frames, ratio_test, hit_value):
+    frames = [ (e, hit_value) for e in frames ]
+    random.shuffle(frames)
+
+    frames_train, frames_test = list_splitter(frames, ratio_test)
+
+    return frames_train, frames_test
+
 video_info = load_video_info('output-combat3-20230911-210657.sav')
 frames_number = get_frames_number(video_info)
 
-frames_with_hit = [430, 447, 550, 1076, 1432, 2391, 6479, 7110]
-frames_without_hit = get_frames_without_hit(frames_number, frames_with_hit)
+frames_hit = [430, 447, 550, 1076, 1432, 2391, 6479, 7110]
+frames_nohit = get_frames_without_hit(frames_number, frames_hit)
 
-ratio_train_test = 0.125
+ratio_test = 0.25
 
-print(frames_number)
+frames_hit_train, frames_hit_test = separate_frames(frames_hit, ratio_test, 1)
+frames_nohit_train, frames_nohit_test = separate_frames(frames_nohit, ratio_test, 0)
+
+print('========================================================')
+print(frames_hit_train)
+print(frames_hit_test)
+print(frames_nohit_train)
+print(frames_nohit_test)
+
+print(len(frames_hit_train))
+print(len(frames_hit_test))
+print(len(frames_nohit_train))
+print(len(frames_nohit_test))
 
 exit()
+
 def flatten_fighters_list(frame):
     points = []
 
