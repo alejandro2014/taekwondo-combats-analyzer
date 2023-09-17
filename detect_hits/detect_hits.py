@@ -37,7 +37,7 @@ def separate_frames(frames, ratio_test, hit_value):
 
     return frames_train, frames_test
 
-def get_train_and_test_indices(frames_hit, ratio_test):
+def get_train_and_test_indices(frames_hit, ratio_test, frames_number):
     frames_nohit = get_frames_without_hit(frames_number, frames_hit)
 
     frames_hit_train, frames_hit_test = separate_frames(frames_hit, ratio_test, 1)
@@ -54,46 +54,38 @@ def get_train_and_test_indices(frames_hit, ratio_test):
         'test': frames_test
     }
 
-def load_persons(queues, indices, person1_track, person2_track):
+def load_persons(dataset_type, queue1, queue2, indices):
     return [
-        ((
-            queues[person1_track].array[i],
-            queues[person2_track].array[i]
-        ), e[1])
-        for i, e in enumerate(indices['train'])
+        (
+            ( queue1.array[i], queue2.array[i] ),
+            e[1]
+        ) for i, e in enumerate(indices[dataset_type])
     ]
     
+def get_datasets(frames_hit, ratio_test, input_combat_info_file):
+    queues = load_video_info(input_combat_info_file)
+    frames_number = get_frames_number(queues)
+    indices = get_train_and_test_indices(frames_hit, ratio_test, frames_number)
+
+    # Colas de fotogramas detectadas como las que más detecciones no nulas comparten
+    queue1 = queues[1]
+    queue2 = queues[2]
+
+    train = load_persons('train', queue1, queue2, indices)
+    test = load_persons('test', queue1, queue2, indices)
+
+    return train, test
+
 frames_hit = [ 430, 447, 550, 1076, 1432, 2391, 6479, 7110 ]
 ratio_test = 0.25
 input_combat_info_file = 'output-combat3-20230911-210657.sav'
-queue_person1 = 0
-queue_person2 = 1
 
-queues = load_video_info(input_combat_info_file)
-frames_number = get_frames_number(queues)
+train_dataset, test_dataset = get_datasets(frames_hit, ratio_test, input_combat_info_file)
 
-indices = get_train_and_test_indices(frames_hit, ratio_test)
+print(len(train_dataset))
+print(len(test_dataset))
 
-print(f'q{queue_person1}, q{queue_person2} -> ', end='')
-persons = load_persons(queues, indices, queue_person1, queue_person2)
-print(len([ p for p in persons if p[0][0] is not None and p[0][1] is not None ]))
-
-exit()
-
-def flatten_fighters_list(frame):
-    points = []
-
-    for person in frame:
-        for point in person:
-            new_point = int(str(int(point[0] * 10000)) + str(int(point[1] * 10000)))
-
-            points.append(new_point)
-
-    return points
-
-def get_persons_by_indices(frames, indices):
-    return [ flatten_fighters_list(frames[i]) for i in indices ]
-
+#--------------------------------------------------------------------------
 video_info = load_video_info('combat3-20230911-210657.sav')
 
 flat_results = [ flatten_fighters_list(frame) for frame in video_info['results'] ]
@@ -129,3 +121,53 @@ nueva_lista_pose = np.array([1.2, 2.3, 0.5, ...])  # Reemplaza con valores reale
 prediccion_golpe = svm_model.predict([nueva_lista_pose])
 
 # La variable 'prediccion_golpe' ahora contiene 1 si se predice un golpe, o 0 si no se predice un golpe.
+
+exit()
+
+def get_metrics(dataset):
+    not_null = [ p for p in dataset if p[0][0] is not None and p[0][1] is not None ]
+
+    return {
+        'not_null': not_null,
+        'not_null_hit': [ p for p in not_null if p[1] == 1 ],
+        'not_null_nohit': [ p for p in not_null if p[1] == 0 ]
+    }
+
+train_metrics = get_metrics(train)
+test_metrics = get_metrics(test)
+
+print(f"train: {len(train)}")
+print(f"train_not_null: {len(train_metrics['not_null'])}")
+print(f"train_not_null_hit: {len(train_metrics['not_null_hit'])}")
+print(f"train_not_null_nohit: {len(train_metrics['not_null_nohit'])}")
+print('-----------------------')
+print(f"test: {len(test)}")
+print(f"test_not_null: {len(test_metrics['not_null'])}")
+print(f"test_not_null_hit: {len(test_metrics['not_null_hit'])}")
+print(f"test_not_null_nohit: {len(test_metrics['not_null_nohit'])}")
+
+exit()
+
+def show_filled_persons(queues, indices):
+    queues_no = len(queues)
+
+    for i in range(queues_no):
+        for j in range(queues_no):
+            persons = load_persons(queues, indices, i, j)
+            print(len([ p for p in persons if p[0][0] is not None and p[0][1] is not None ]), end='')
+            print(' ', end='')
+        print()
+
+def flatten_fighters_list(frame):
+    points = []
+
+    for person in frame:
+        for point in person:
+            new_point = int(str(int(point[0] * 10000)) + str(int(point[1] * 10000)))
+
+            points.append(new_point)
+
+    return points
+
+def get_persons_by_indices(frames, indices):
+    return [ flatten_fighters_list(frames[i]) for i in indices ]
