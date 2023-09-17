@@ -1,13 +1,11 @@
 import joblib
 import random
 
-"""
 import numpy as np
 
-from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 from sklearn.svm import SVC
-"""
 
 def load_video_info(info_path):
     return joblib.load(info_path)
@@ -82,28 +80,11 @@ input_combat_info_file = 'output-combat3-20230911-210657.sav'
 
 train_dataset, test_dataset = get_datasets(frames_hit, ratio_test, input_combat_info_file)
 
-print(len(train_dataset))
-print(len(test_dataset))
-
 #--------------------------------------------------------------------------
-video_info = load_video_info('combat3-20230911-210657.sav')
-
-flat_results = [ flatten_fighters_list(frame) for frame in video_info['results'] ]
-
-nohit_train, nohit_test, hit_train_frames, hit_test_frames = get_indexes()
-
-frames = video_info['results']
-
-nohit_train = get_persons_by_indices(frames, nohit_train)
-hit_train_frames = get_persons_by_indices(frames, hit_train_frames)
-
-nohit_test = get_persons_by_indices(frames, nohit_test)
-hit_test_frames = get_persons_by_indices(frames, hit_test_frames)
-
-X = nohit_train + hit_train_frames + nohit_test + hit_test_frames
-y = [0] * len(nohit_train) + [1] * len(hit_train_frames) + [0] * len(nohit_test) + [1] * len(hit_test_frames)
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.125, random_state=52)
+X_train = [ e[0] for e in train_dataset ]
+X_test = [ e[0] for e in test_dataset ]
+y_train = [ e[1] for e in train_dataset ]
+y_test = [ e[1] for e in test_dataset ]
 
 svm_model = SVC(kernel='linear', C=1)
 svm_model.fit(X_train, y_train)
@@ -123,6 +104,23 @@ prediccion_golpe = svm_model.predict([nueva_lista_pose])
 # La variable 'prediccion_golpe' ahora contiene 1 si se predice un golpe, o 0 si no se predice un golpe.
 
 exit()
+#--------------------------------------------------------------------------
+X = nohit_train + hit_train_frames + nohit_test + hit_test_frames
+y = [0] * len(nohit_train) + [1] * len(hit_train_frames) + [0] * len(nohit_test) + [1] * len(hit_test_frames)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=ratio_test, random_state=52)
+
+flat_results = [ flatten_fighters_list(frame) for frame in video_info['results'] ]
+
+nohit_train, nohit_test, hit_train_frames, hit_test_frames = get_indexes()
+
+frames = video_info['results']
+
+nohit_train = get_persons_by_indices(frames, nohit_train)
+hit_train_frames = get_persons_by_indices(frames, hit_train_frames)
+
+nohit_test = get_persons_by_indices(frames, nohit_test)
+hit_test_frames = get_persons_by_indices(frames, hit_test_frames)
 
 def get_metrics(dataset):
     not_null = [ p for p in dataset if p[0][0] is not None and p[0][1] is not None ]
