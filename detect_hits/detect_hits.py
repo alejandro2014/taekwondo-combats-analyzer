@@ -53,12 +53,14 @@ def get_train_and_test_indices(frames_hit, ratio_test, frames_number):
     }
 
 def load_persons(dataset_type, queue1, queue2, indices):
-    return [
+    dataset = [
         (
             ( queue1.array[i], queue2.array[i] ),
             e[1]
         ) for i, e in enumerate(indices[dataset_type])
     ]
+
+    return [ p for p in dataset if p[0][0] is not None and p[0][1] is not None ]
     
 def get_datasets(frames_hit, ratio_test, input_combat_info_file):
     queues = load_video_info(input_combat_info_file)
@@ -80,11 +82,15 @@ input_combat_info_file = 'output-combat3-20230911-210657.sav'
 
 train_dataset, test_dataset = get_datasets(frames_hit, ratio_test, input_combat_info_file)
 
+print(train_dataset[:10])
+exit()
 #--------------------------------------------------------------------------
-X_train = [ e[0] for e in train_dataset ]
-X_test = [ e[0] for e in test_dataset ]
-y_train = [ e[1] for e in train_dataset ]
-y_test = [ e[1] for e in test_dataset ]
+#print([ e[0] for e in train_dataset ])
+
+X_train = np.array([ e[0] for e in train_dataset ])
+X_test = np.array([ e[0] for e in test_dataset ])
+y_train = np.array([ e[1] for e in train_dataset ])
+y_test = np.array([ e[1] for e in test_dataset ])
 
 svm_model = SVC(kernel='linear', C=1)
 svm_model.fit(X_train, y_train)
