@@ -74,9 +74,9 @@ frames_number = get_frames_number(queues)
 
 indices = get_train_and_test_indices(frames_hit, ratio_test)
 
+print(f'q{queue_person1}, q{queue_person2} -> ', end='')
 persons = load_persons(queues, indices, queue_person1, queue_person2)
-
-print(persons)
+print(len([ p for p in persons if p[0][0] is not None and p[0][1] is not None ]))
 
 exit()
 
