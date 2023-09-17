@@ -37,27 +37,40 @@ def separate_frames(frames, ratio_test, hit_value):
 
     return frames_train, frames_test
 
-video_info = load_video_info('output-combat3-20230911-210657.sav')
-frames_number = get_frames_number(video_info)
+def get_train_and_test_indices(frames_hit, ratio_test):
+    frames_nohit = get_frames_without_hit(frames_number, frames_hit)
 
-frames_hit = [430, 447, 550, 1076, 1432, 2391, 6479, 7110]
-frames_nohit = get_frames_without_hit(frames_number, frames_hit)
+    frames_hit_train, frames_hit_test = separate_frames(frames_hit, ratio_test, 1)
+    frames_nohit_train, frames_nohit_test = separate_frames(frames_nohit, ratio_test, 0)
 
+    frames_train = frames_nohit_train + frames_hit_train
+    frames_test = frames_nohit_test + frames_hit_test
+
+    random.shuffle(frames_train)
+    random.shuffle(frames_test)
+
+    return {
+        'train': frames_train,
+        'test': frames_test
+    }
+
+def load_persons(queues, indices, person1_track, person2_track):
+    hola = [ (e[0], e[1]) for e in indices['train'] ]
+
+    return None
+    
+frames_hit = [ 430, 447, 550, 1076, 1432, 2391, 6479, 7110 ]
 ratio_test = 0.25
+input_combat_info_file = 'output-combat3-20230911-210657.sav'
 
-frames_hit_train, frames_hit_test = separate_frames(frames_hit, ratio_test, 1)
-frames_nohit_train, frames_nohit_test = separate_frames(frames_nohit, ratio_test, 0)
+queues = load_video_info(input_combat_info_file)
+frames_number = get_frames_number(queues)
 
-print('========================================================')
-print(frames_hit_train)
-print(frames_hit_test)
-print(frames_nohit_train)
-print(frames_nohit_test)
+indices = get_train_and_test_indices(frames_hit, ratio_test)
 
-print(len(frames_hit_train))
-print(len(frames_hit_test))
-print(len(frames_nohit_train))
-print(len(frames_nohit_test))
+persons = load_persons(queues, indices, 0, 1)
+
+print(persons)
 
 exit()
 
@@ -71,31 +84,6 @@ def flatten_fighters_list(frame):
             points.append(new_point)
 
     return points
-
-def get_indexes():
-    length_video_frames = 9009
-
-    all_frames = list(range(length_video_frames))
-
-    hit_train_frames = [430, 447, 550, 1076, 1432, 2391, 6479]
-    hit_test_frames = [7110]
-    hit_frames = hit_train_frames + hit_test_frames
-
-    ratio = len(hit_test_frames) / len(hit_frames)
-
-    for i in hit_frames:
-        all_frames.remove(i)
-
-    random.shuffle(all_frames)
-
-    nohit_frames = all_frames
-
-    test_frames_number = int(len(nohit_frames) * ratio)
-
-    nohit_test = nohit_frames[:test_frames_number]
-    nohit_train = nohit_frames[test_frames_number:]
-
-    return nohit_train, nohit_test, hit_train_frames, hit_test_frames
 
 def get_persons_by_indices(frames, indices):
     return [ flatten_fighters_list(frames[i]) for i in indices ]
