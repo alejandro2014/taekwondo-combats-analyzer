@@ -55,20 +55,26 @@ def get_train_and_test_indices(frames_hit, ratio_test):
     }
 
 def load_persons(queues, indices, person1_track, person2_track):
-    hola = [ (e[0], e[1]) for e in indices['train'] ]
-
-    return None
+    return [
+        ((
+            queues[person1_track].array[i],
+            queues[person2_track].array[i]
+        ), e[1])
+        for i, e in enumerate(indices['train'])
+    ]
     
 frames_hit = [ 430, 447, 550, 1076, 1432, 2391, 6479, 7110 ]
 ratio_test = 0.25
 input_combat_info_file = 'output-combat3-20230911-210657.sav'
+queue_person1 = 0
+queue_person2 = 1
 
 queues = load_video_info(input_combat_info_file)
 frames_number = get_frames_number(queues)
 
 indices = get_train_and_test_indices(frames_hit, ratio_test)
 
-persons = load_persons(queues, indices, 0, 1)
+persons = load_persons(queues, indices, queue_person1, queue_person2)
 
 print(persons)
 
