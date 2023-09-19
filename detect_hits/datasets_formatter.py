@@ -49,18 +49,25 @@ class DatasetsFormatter:
         frames = [ (e, hit_value) for e in frames ]
         random.shuffle(frames)
 
-        frames_train, frames_test = self.list_splitter(frames, ratio_test)
+        frames_test, frames_train = self.list_splitter(frames, ratio_test)
 
-        return frames_train, frames_test
+        return frames_test, frames_train
 
     def get_train_and_test_indices(self, frames_hit, ratio_test, frames_number):
         frames_nohit = self.get_frames_without_hit(frames_number, frames_hit)
 
-        frames_hit_train, frames_hit_test = self.separate_frames(frames_hit, ratio_test, 1)
-        frames_nohit_train, frames_nohit_test = self.separate_frames(frames_nohit, ratio_test, 0)
+        frames_hit_test, frames_hit_train = self.separate_frames(frames_hit, ratio_test, 1)
+        frames_nohit_test, frames_nohit_train = self.separate_frames(frames_nohit, ratio_test, 0)
 
         frames_train = frames_nohit_train + frames_hit_train
         frames_test = frames_nohit_test + frames_hit_test
+
+        print(f'frames_hit_train: {len(frames_hit_train)}')
+        print(f'frames_hit_test: {len(frames_hit_test)}')
+        print(f'frames_nohit_train: {len(frames_nohit_train)}')
+        print(f'frames_nohit_test: {len(frames_nohit_test)}')
+        print(f'frames_train: {len(frames_train)}')
+        print(f'frames_test: {len(frames_test)}')
 
         random.shuffle(frames_train)
         random.shuffle(frames_test)
@@ -75,6 +82,9 @@ class DatasetsFormatter:
             ((queue1.array[i], queue2.array[i]), e[1])
             for i, e in enumerate(indices[dataset_type])
         ]
+
+        print(f'Longitud del dataset original: {len(dataset)}')
+        print(f'Longitud del dataset filtrado: {len([ p for p in dataset if p[0][0] is not None and p[0][1] is not None ])}')
 
         return [ p for p in dataset if p[0][0] is not None and p[0][1] is not None ]
         
